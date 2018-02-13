@@ -15,6 +15,7 @@ shinyServer(function(input, output) {
       toJSON(values$net$W2),
       toJSON(colnames(values$net$X)[-1]),
       toJSON(levels(values$net$Y))))
+    runjs(sprintf("buildGraph()"))
   })
   
   observeEvent(input$go, {
@@ -29,11 +30,12 @@ shinyServer(function(input, output) {
         trace = input$nTrace,
         learn_rate = input$nLearn,
         tolerance = input$nTolerance,
-        progress = function(x) {
+        progress = function(x, neterror) {
           progress$set(x)
           runjs(sprintf("updateNetwork(%s, %s, 2, 10)", 
             toJSON(values$net$W1),
             toJSON(values$net$W2)))
+          runjs(sprintf("updateGraph(%.4f)", neterror))
         })},
       message = function(m) {
         shinyjs::html(id="messages", html=m$message, add=T)

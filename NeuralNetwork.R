@@ -65,11 +65,12 @@ NeuralNetwork <- R6Class("NeuralNetwork",
       for (i in seq_len(iterations)) {
         self$feedforward()$backpropagate(learn_rate)
         if (trace > 0 && i %% trace == 0) {
+          loss = self$compute_loss()
           message(sprintf('Iteration %i\tLoss %.3f\tAccuracy %.3f',
             i,
-            self$compute_loss(),
+            loss,
             self$accuracy()))
-          if (!is.null(progress)) progress(i/iterations)
+          if (!is.null(progress)) progress(i/iterations, loss)
         }
         if (self$compute_loss() < tolerance) break
       }

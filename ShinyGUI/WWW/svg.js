@@ -1,3 +1,11 @@
+var netsvg = null;
+var W1_lines = [];
+var W2_lines = [];
+
+var graph_lines = null;
+var graph_Scale = 0;
+var graph_nest = null;
+
 $(document).on('shiny:connected', function(event) {
   SVG.extend(SVG.Gradient, {
     // Get color at given offset
@@ -164,5 +172,32 @@ updateNetwork = function(W1, W2, max_weight, max_edge_width) {
   
 };
 
+buildGraph = function() {
+  console.log("build graph")
+  graph_nest = netsvg.nested();
+  graph_lines = [];
+  error_scale = 0;
+  
+  graph_nest.line(0, 0, 0, 100).stroke({ width: 1 }); // axes
+  graph_nest.line(0, 100, 400, 100).stroke({ width: 1 }); // axes
 
+  graph_nest.move(10,500);
+};
 
+updateGraph = function(y) {
+  if (error_scale === 0) {
+    error_scale = 1 / (y * 1.1); // set max error to 110% of y
+    graph_lines.push(graph_nest.line(5, y*error_scale*100, 5, y*error_scale*100));
+  }
+  else {
+    var last_line = graph_lines[graph_lines.length - 1];
+    graph_lines.push(graph_nest.line(
+      last_line.array().value[1][0], 
+      last_line.array().value[1][1],
+      last_line.array().value[1][0] + 10,
+      y*error_scale*100).stroke({ width: 1 }));
+  }
+  var last_line = graph_lines[graph_lines.length - 1];
+  console.log(last_line.array())
+  console.log(last_line.array().value[1][1])
+}
