@@ -35,7 +35,7 @@ clearNetwork = function() {
   netsvg.clear();
 };
 
-buildNetwork = function(W1, W2) {
+buildNetwork = function(W1, W2, xlabels, ylabels) {
   
   var input_nodes = [];
   var hidden_nodes = [];
@@ -44,27 +44,71 @@ buildNetwork = function(W1, W2) {
   var level_spacing = 200;
   var node_spacing = 80;
   
-  var max_nodes_per_level = Math.max(W1.length, W1[0].length, W2[0].length);
+  var max_nodes_per_level = Math.max(W1.length, W2.length, W2[0].length);
   
-  var W1_g = netsvg.group();
-  var W2_g = netsvg.group();
-  var in_g = netsvg.group();
+  var nest = netsvg.nested();
+  var W1_g = nest.group();
+  var W2_g = nest.group();
+  var in_g = nest.group();
+  var h_g = nest.group();
+  var o_g = nest.group();
   
+  // build nodes
   for (var i = 0; i < W1.length; i++) {
-    var offset = (max_nodes_per_level - W1.length) / 2;
-    input_nodes.push(in_g.circle(30).move(10 + (level_spacing * 0), node_spacing * (i + offset)));
+    var offset = (max_nodes_per_level - W1.length) / 2.0;
+    if (i===0)
+      input_nodes.push(in_g.rect(30,30));
+    else
+      input_nodes.push(in_g.circle(30));
+    input_nodes[i].move(10 + (level_spacing * 0), node_spacing * (i + offset));
   }
   
   for (var i = 0; i < W2.length; i++) {
-    var offset = (max_nodes_per_level - W1[0].length) / 2;
-    hidden_nodes.push(netsvg.circle(30).move(10 + (level_spacing * 1), node_spacing * (i + offset)));
+    var offset = (max_nodes_per_level - W2.length) / 2;
+    if (i===0)
+      hidden_nodes.push(h_g.rect(30,30));
+    else
+      hidden_nodes.push(h_g.circle(30));
+    hidden_nodes[i].move(10 + (level_spacing * 1), node_spacing * (i + offset));
   }
   
   for (var i = 0; i < W2[0].length; i++) {
     var offset = (max_nodes_per_level - W2[0].length) / 2;
-    output_nodes.push(netsvg.circle(30).move(10 + (level_spacing * 2), node_spacing * (i + offset)));
+    output_nodes.push(o_g.circle(30).move(10 + (level_spacing * 2), node_spacing * (i + offset)));
   }
   
+  // build text
+  var labels_g = nest.group()
+  for (var i=1; i< input_nodes.length; i++) {
+    label = labels_g.text(xlabels[i-1])
+    lbb = label.bbox()
+    nbb = input_nodes[i].bbox()
+    // align label bbox center with node bbox center
+    // right align text with node
+    label.move(nbb.x - 5 - lbb.width, nbb.cy - (lbb.height/2))
+  }
+  
+  for (var i=0; i<output_nodes.length; i++) {
+    label = labels_g.text(ylabels[i])
+    lbb = label.bbox()
+    nbb = output_nodes[i].bbox()
+    // align label bbox center with node bbox center
+    // right align text with node
+    label.move(nbb.x2 + 5, nbb.cy - (lbb.height/2))
+  }
+  
+  nest.move(labels_g.bbox().x * -1 + 10,30);
+  
+  // style nodes
+  in_g.fill({color:'lightgreen'});
+  in_g.stroke({color:'black'});
+  h_g.fill({color:'mediumseagreen'});
+  h_g.stroke({color:'black'});
+  o_g.fill({color:'lightgreen'});
+  o_g.stroke({color:'black'});
+  
+  
+  // build lines and save to global variables
   W1_lines = [];
   W2_lines = [];
   
@@ -101,7 +145,8 @@ updateNetwork = function(W1, W2, max_weight, max_edge_width) {
     	var w_scaled = Math.max(Math.min(W1[i][h] / max_weight, max_weight), -max_weight);
       W1_lines[i][h].stroke({
         width: Math.abs(w_scaled) * max_edge_width,
-        color: edge_gradient.colorAt(w_scaled)
+        color: edge_gradient.colorAt(w_scaled),
+        opacity: 0.6
       });
     }
   }
@@ -111,7 +156,8 @@ updateNetwork = function(W1, W2, max_weight, max_edge_width) {
     	var w_scaled = Math.max(Math.min(W2[h][o] / max_weight, max_weight), -max_weight);
       W2_lines[h][o].stroke({
         width: Math.abs(w_scaled) * max_edge_width,
-        color: edge_gradient.colorAt(w_scaled)
+        color: edge_gradient.colorAt(w_scaled),
+        opacity: 0.6
       });
     }
   }

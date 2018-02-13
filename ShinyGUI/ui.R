@@ -51,23 +51,12 @@ shinyUI(fluidPage(
       tabsetPanel(
         tabPanel("Info",
           # withMathJax(includeHTML("math.html"))
-          div(id="network-svg")
-          ),
-        tabPanel("Console", pre(id = "consoleOutput", class="shiny-text-output"), style="height:400px; margin-top:20px"), 
-          #verbatimTextOutput("console")),
+          div(id="network-svg")),
+        tabPanel("Console", 
+          pre(id = "messages", class="shiny-text-output", style="height:800px; margin-top:20px")), 
         tabPanel("Plot", 
-          plotOutput("distPlot"), style="margin-top:20px"),
-        tabPanel("Network", 
-          fluidRow(
-            column(6,
-              radioButtons("rbVisEdges","Edges:", c("weights","updateValues.w","gradient.w", "gradient_sum.w", "lastWtChanges.w"))
-            ),
-            column(6,
-              radioButtons("rbVisNodes","Nodes:", c("z","activations","delta"))
-            )
-          ),
-          visNetworkOutput("network"),  style="margin-top:20px"),
+          plotOutput("distPlot"), style="margin-top:20px")),
         id="maintabs")
     )
   )
-))
+)
