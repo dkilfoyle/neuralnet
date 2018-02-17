@@ -60,7 +60,7 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
   
   var max_nodes_per_level = Math.max(W1.length, W2.length, W2[0].length);
   
-  net_nest = netsvg.nested();
+  net_nest = netsvg.group();
   var W1_g = net_nest.group();
   var W2_g = net_nest.group();
   var in_g = net_nest.group();
@@ -113,8 +113,8 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
     label.move(nbb.x2 + 5, nbb.cy - (lbb.height/2));
   }
   
-  net_nest.move(labels_g.bbox().x * -1 + 10,0);
-  //net_nest.move(net_nest.bbox().x * -1 + 10,200);
+  // center the whole network diagram within the viewbox (width 800)
+  net_nest.cx(400);
   
   // style nodes
   in_g.fill({color:'lightgreen'});
