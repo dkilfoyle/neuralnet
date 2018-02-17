@@ -4,15 +4,23 @@ library(shinyjs)
 library(jsonlite)
 library(plotly)
 
-values = reactiveValues(
-  net=NULL,
-  p=plot_ly(
+buildTrainingPlot = function() {
+  plot_ly(
     y=c(0),
     x=c(0),
     type="scatter",
     mode="lines",
     line=list(color='#25FEFD', width=3)
-  ),
+  ) %>% 
+    layout(
+      xaxis=list(rangemode = "tozero"),
+      yaxis=list(rangemode = "tozero")
+    )
+}
+
+values = reactiveValues(
+  net=NULL,
+  p=buildTrainingPlot(),
   traces=0
 )
 
@@ -32,13 +40,7 @@ shinyServer(function(input, output, session) {
   output$trainPlot = renderPlotly(values$p)
   
   observeEvent(input$clearTrainingPlots, {
-    values$p=plot_ly(
-      y=c(0),
-      x=c(0),
-      type="scatter",
-      mode="lines",
-      line=list(width=3)
-    )
+    values$p=buildTrainingPlot()
     values$traces = 0
   })
 
