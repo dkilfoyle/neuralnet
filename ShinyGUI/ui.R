@@ -52,10 +52,10 @@ shinyUI(fluidPage(
       tabsetPanel(
         tabPanel("Training",
           fluidRow(
-            plotlyOutput("trainPlot", height="300px")
+            div(plotlyOutput("trainPlot", height="300px"), style="padding-right: 30px")
           ),
           fluidRow(
-            div(id="network-svg", style="height:400px")
+            div(id="network-svg", style="height:400px; padding-right:30px")
           )),
           # withMathJax(includeHTML("math.html"))
         tabPanel("Console", 

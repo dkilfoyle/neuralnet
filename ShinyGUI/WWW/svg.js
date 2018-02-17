@@ -67,7 +67,7 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
   var h_g = net_nest.group();
   var o_g = net_nest.group();
   
-  var node_x = 10;
+  var node_x = 100;
   
   // build nodes
   for (var i = 0; i < W1.length; i++) {
