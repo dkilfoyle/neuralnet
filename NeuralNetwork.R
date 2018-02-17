@@ -1,3 +1,5 @@
+# http://selbydavid.com/2018/01/09/neural-network/
+
 library(R6)
 NeuralNetwork <- R6Class("NeuralNetwork",
   public = list(
