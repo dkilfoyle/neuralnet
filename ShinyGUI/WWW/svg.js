@@ -2,6 +2,8 @@ var netsvg = null;
 var W1_lines = [];
 var W2_lines = [];
 
+var net_nest = null;
+
 var graph_lines = null;
 var graph_Scale = 0;
 var graph_nest = null;
@@ -43,6 +45,10 @@ clearNetwork = function() {
   netsvg.clear();
 };
 
+drawBB = function(bb) {
+  netsvg.rect(bb.x, bb.y, bb.x2, bb.y2).stroke({width:1});
+}
+
 buildNetwork = function(W1, W2, xlabels, ylabels) {
   
   var input_nodes = [];
@@ -54,12 +60,14 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
   
   var max_nodes_per_level = Math.max(W1.length, W2.length, W2[0].length);
   
-  var nest = netsvg.nested();
-  var W1_g = nest.group();
-  var W2_g = nest.group();
-  var in_g = nest.group();
-  var h_g = nest.group();
-  var o_g = nest.group();
+  net_nest = netsvg.nested();
+  var W1_g = net_nest.group();
+  var W2_g = net_nest.group();
+  var in_g = net_nest.group();
+  var h_g = net_nest.group();
+  var o_g = net_nest.group();
+  
+  var node_x = 10;
   
   // build nodes
   for (var i = 0; i < W1.length; i++) {
@@ -68,7 +76,7 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
       input_nodes.push(in_g.rect(30,30));
     else
       input_nodes.push(in_g.circle(30));
-    input_nodes[i].move(10 + (level_spacing * 0), node_spacing * (i + offset));
+    input_nodes[i].move(node_x + (level_spacing * 0), node_spacing * (i + offset));
   }
   
   for (var i = 0; i < W2.length; i++) {
@@ -77,35 +85,36 @@ buildNetwork = function(W1, W2, xlabels, ylabels) {
       hidden_nodes.push(h_g.rect(30,30));
     else
       hidden_nodes.push(h_g.circle(30));
-    hidden_nodes[i].move(10 + (level_spacing * 1), node_spacing * (i + offset));
+    hidden_nodes[i].move(node_x + (level_spacing * 1), node_spacing * (i + offset));
   }
   
   for (var i = 0; i < W2[0].length; i++) {
     var offset = (max_nodes_per_level - W2[0].length) / 2;
-    output_nodes.push(o_g.circle(30).move(10 + (level_spacing * 2), node_spacing * (i + offset)));
+    output_nodes.push(o_g.circle(30).move(node_x + (level_spacing * 2), node_spacing * (i + offset)));
   }
   
   // build text
-  var labels_g = nest.group()
+  var labels_g = net_nest.group();
   for (var i=1; i< input_nodes.length; i++) {
-    label = labels_g.text(xlabels[i-1])
-    lbb = label.bbox()
-    nbb = input_nodes[i].bbox()
+    label = labels_g.text(xlabels[i-1]);
+    lbb = label.bbox();
+    nbb = input_nodes[i].bbox();
     // align label bbox center with node bbox center
     // right align text with node
-    label.move(nbb.x - 5 - lbb.width, nbb.cy - (lbb.height/2))
+    label.move(nbb.x - 5 - lbb.width, nbb.cy - (lbb.height/2));
   }
   
   for (var i=0; i<output_nodes.length; i++) {
-    label = labels_g.text(ylabels[i])
-    lbb = label.bbox()
-    nbb = output_nodes[i].bbox()
+    label = labels_g.text(ylabels[i]);
+    lbb = label.bbox();
+    nbb = output_nodes[i].bbox();
     // align label bbox center with node bbox center
     // right align text with node
-    label.move(nbb.x2 + 5, nbb.cy - (lbb.height/2))
+    label.move(nbb.x2 + 5, nbb.cy - (lbb.height/2));
   }
   
-  nest.move(labels_g.bbox().x * -1 + 10,30);
+  net_nest.move(labels_g.bbox().x * -1 + 10,0);
+  //net_nest.move(net_nest.bbox().x * -1 + 10,200);
   
   // style nodes
   in_g.fill({color:'lightgreen'});
@@ -173,31 +182,32 @@ updateNetwork = function(W1, W2, max_weight, max_edge_width) {
 };
 
 buildGraph = function() {
-  console.log("build graph")
+  console.log("build graph");
   graph_nest = netsvg.nested();
   graph_lines = [];
   error_scale = 0;
   
-  graph_nest.line(0, 0, 0, 100).stroke({ width: 1 }); // axes
-  graph_nest.line(0, 100, 400, 100).stroke({ width: 1 }); // axes
-
-  graph_nest.move(10,500);
+  graph_nest.line(50, 0, 50, 100).stroke({ width: 1 }); // axes
+  graph_nest.line(50, 100, net_nest.bbox().x2-50, 100).stroke({ width: 1 }); // axes
+  
 };
 
-updateGraph = function(y) {
+getGraphY = function(y) {
+  return (100 - Math.min(y * error_scale * 100, 100));
+}
+
+updateGraph = function(y, pcompleted) {
   if (error_scale === 0) {
     error_scale = 1 / (y * 1.1); // set max error to 110% of y
-    graph_lines.push(graph_nest.line(5, y*error_scale*100, 5, y*error_scale*100));
+    graph_lines.push(graph_nest.line(55, getGraphY(y), 55, getGraphY(y)));
   }
   else {
     var last_line = graph_lines[graph_lines.length - 1];
     graph_lines.push(graph_nest.line(
       last_line.array().value[1][0], 
       last_line.array().value[1][1],
-      last_line.array().value[1][0] + 10,
-      y*error_scale*100).stroke({ width: 1 }));
+      55 + ((net_nest.bbox().x2-100) * pcompleted),
+      getGraphY(y)).stroke({ width: 1 }));
   }
   var last_line = graph_lines[graph_lines.length - 1];
-  console.log(last_line.array())
-  console.log(last_line.array().value[1][1])
 }

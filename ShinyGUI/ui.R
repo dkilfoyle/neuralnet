@@ -1,6 +1,7 @@
 library(shiny)
 library(visNetwork)
 library(shinyjs)
+library(plotly)
 
 
 shinyUI(fluidPage(
@@ -49,9 +50,14 @@ shinyUI(fluidPage(
     # Show a plot of the generated distribution
     mainPanel(
       tabsetPanel(
-        tabPanel("Info",
+        tabPanel("Training",
+          fluidRow(
+            plotlyOutput("trainPlot", height="300px")
+          ),
+          fluidRow(
+            div(id="network-svg", style="height:400px")
+          )),
           # withMathJax(includeHTML("math.html"))
-          div(id="network-svg")),
         tabPanel("Console", 
           pre(id = "messages", class="shiny-text-output", style="height:800px; margin-top:20px")), 
         tabPanel("Plot", 

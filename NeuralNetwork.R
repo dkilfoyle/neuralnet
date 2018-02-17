@@ -70,7 +70,7 @@ NeuralNetwork <- R6Class("NeuralNetwork",
             i,
             loss,
             self$accuracy()))
-          if (!is.null(progress)) progress(i/iterations, loss)
+          if (!is.null(progress)) progress(i, loss)
         }
         if (self$compute_loss() < tolerance) break
       }
