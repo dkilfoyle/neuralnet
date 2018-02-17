@@ -181,33 +181,3 @@ updateNetwork = function(W1, W2, max_weight, max_edge_width) {
   
 };
 
-buildGraph = function() {
-  console.log("build graph");
-  graph_nest = netsvg.nested();
-  graph_lines = [];
-  error_scale = 0;
-  
-  graph_nest.line(50, 0, 50, 100).stroke({ width: 1 }); // axes
-  graph_nest.line(50, 100, net_nest.bbox().x2-50, 100).stroke({ width: 1 }); // axes
-  
-};
-
-getGraphY = function(y) {
-  return (100 - Math.min(y * error_scale * 100, 100));
-}
-
-updateGraph = function(y, pcompleted) {
-  if (error_scale === 0) {
-    error_scale = 1 / (y * 1.1); // set max error to 110% of y
-    graph_lines.push(graph_nest.line(55, getGraphY(y), 55, getGraphY(y)));
-  }
-  else {
-    var last_line = graph_lines[graph_lines.length - 1];
-    graph_lines.push(graph_nest.line(
-      last_line.array().value[1][0], 
-      last_line.array().value[1][1],
-      55 + ((net_nest.bbox().x2-100) * pcompleted),
-      getGraphY(y)).stroke({ width: 1 }));
-  }
-  var last_line = graph_lines[graph_lines.length - 1];
-}
