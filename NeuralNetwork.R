@@ -8,8 +8,8 @@ NeuralNetwork <- R6Class("NeuralNetwork",
     output = NULL,
     initialize = function(formula, hidden, data = list()) {
       # Model and training data
-      mod <- model.frame(formula, data = data)
-      self$X <- model.matrix(attr(mod, 'terms'), data = mod)
+      mod <- model.frame(formula, data = data) # extract all the necessary variables from data
+      self$X <- model.matrix(attr(mod, 'terms'), data = mod) # concert any factors to dummy variables, add an intercept/bias term
       self$Y <- model.response(mod)
       
       # Dimensions
@@ -17,9 +17,10 @@ NeuralNetwork <- R6Class("NeuralNetwork",
       K <- length(unique(self$Y)) # number of classes
       H <- hidden # number of hidden nodes (- bias)
       
-      # Initial weights and bias
-      self$W1 <- .01 * matrix(rnorm(D * H), D, H)
-      self$W2 <- .01 * matrix(rnorm((H + 1) * K), H + 1, K)
+      # Initial weights and bias - using small random numbers from guassain distribution mean=0, sd=1
+      # / sqrt(fan_in_n) to normalize variance
+      self$W1 <- .01 * matrix(rnorm(D * H), D, H) / sqrt(D) # each hidden neuron gets d inputs
+      self$W2 <- .01 * matrix(rnorm((H + 1) * K), H + 1, K) / sqrt(H+1) # each output neuron gets h+1 inputs
     },
     fit = function(data = self$X) {
       h <- self$sigmoid(data %*% self$W1)
